@@ -5,10 +5,10 @@ Script to show Indonesia COVID-19 cases by province in ComputerCraft (Minecraft 
 
 ## How to use
 1. Build Advanced monitor and advanced computer like below:
-[![example](https://i.ibb.co/3BByxBs/2020-03-28-17-34-13.png)]()
+[![example](https://camo.githubusercontent.com/09a61f3ccc009a919d6efd2ad82100796153f42c/68747470733a2f2f692e6962622e636f2f334242797842732f323032302d30332d32382d31372d33342d31332e706e67)](https://camo.githubusercontent.com/09a61f3ccc009a919d6efd2ad82100796153f42c/68747470733a2f2f692e6962622e636f2f334242797842732f323032302d30332d32382d31372d33342d31332e706e67)
 
 2. run `covidindo` on the computer (not the monitor)
-[![example](https://i.ibb.co/bWj3x24/2020-03-28-15-36-14.png)]()
+[![example](https://camo.githubusercontent.com/89061cc4b94d81f8098ca356af37b5bf2e6e9352/68747470733a2f2f692e6962622e636f2f62576a337832342f323032302d30332d32382d31352d33362d31342e706e67)](https://camo.githubusercontent.com/89061cc4b94d81f8098ca356af37b5bf2e6e9352/68747470733a2f2f692e6962622e636f2f62576a337832342f323032302d30332d32382d31352d33362d31342e706e67)
 
 ## Options
 `--log` for logarithmic heatmap coloring
