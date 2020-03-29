@@ -1,4 +1,4 @@
-Pair = {}
+local Pair = {}
 local meta = {__index = Pair}
 
 setmetatable(Pair, {

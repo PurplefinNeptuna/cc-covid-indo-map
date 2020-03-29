@@ -1,6 +1,6 @@
-tableExt = {}
+local tableExt = {}
 function tableExt.length(T)
-    count = 0
+    local count = 0
     for _ in pairs(T) do
         count = count+1
     end
@@ -8,14 +8,14 @@ function tableExt.length(T)
 end
 
 function tableExt.keyList(T)
-    arr = {}
+    local arr = {}
     for k,v in pairs(T) do
         table.insert(arr,k)
     end
-    
+
     table.sort(arr)
-    
-    res = ""
+
+    local res = ""
     for i, name in ipairs(arr) do
         res = res..name.."\n"
     end

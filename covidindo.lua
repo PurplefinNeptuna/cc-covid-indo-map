@@ -39,12 +39,27 @@ if #arg > 0 then
 	end
 end
 
+--read mapdata
+local data = fs.open("mapindo.json","r")
+local cvdata = data.readAll()
+data.close()
+local mapData = json.decode(cvdata)
+
+--read code to region name
+data = fs.open("c2nindo.json","r")
+cvdata = data.readAll()
+data.close()
+local c2name = json.decode(cvdata)
+
 --build windows
 local mapWindow = window.create(m,1,9,121,44)
 local titleWindow = window.create(m,2,2,97,6)
 local dataWindow = window.create(m,1,8,33,1)
 local creatorWindow = window.create(m,100,2,20,1)
 local timeWindow = window.create(m,92,8,30,1)
+local legendWindow = window.create(m,6,40,14,10)
+local totalWindow = window.create(m,102,14,19,6)
+local popupWindow = window.create(m,1,1,27,6)
 
 --read timestamp
 local tstampfile = fs.open("tsindo","r")
@@ -52,17 +67,27 @@ local tstamp = tonumber(tstampfile.readAll())
 tstampfile.close()
 local tstampnow = os.time(os.date("*t"))
 
-local cvdata
+local totalData
 local function updateData()
     print("Updating data...")
-    local getdata = http.get("https://api.kawalcorona.com/indonesia/provinsi")
-	tstampnow = os.time(os.date("*t"))
-	tstamp = tstampnow
+	local getdata = http.get("https://api.kawalcorona.com/indonesia/provinsi")
     cvdata = getdata.readAll()
-    local savedata = fs.open("dataindo.json","w")
+
+	local savedata = fs.open("dataindo.json","w")
     savedata.write(cvdata)
     savedata.close()
-    savedata = fs.open("tsindo","w")
+
+	getdata = http.get("https://api.kawalcorona.com/indonesia")
+    totalData = getdata.readAll()
+
+	savedata = fs.open("indototal.json","w")
+    savedata.write(totalData)
+    savedata.close()
+
+	tstampnow = os.time(os.date("*t"))
+	tstamp = tstampnow
+
+	savedata = fs.open("tsindo","w")
     savedata.write(tstampnow)
     savedata.close()
 end
@@ -76,7 +101,59 @@ else
     local data = fs.open("dataindo.json","r")
     cvdata = data.readAll()
     data.close()
+
+	data = fs.open("indototal.json","r")
+    totalData = data.readAll()
+    data.close()
 end
+
+local function drawLegend()
+	utils.drawWindow(legendWindow, colors.lightBlue, colors.lightGray)
+	utils.drawWindow(totalWindow, colors.lightBlue, colors.lightGray)
+	utils.paintPixel(legendWindow,4,3,colors.white)
+	utils.paintPixel(legendWindow,4,4,colors.yellow)
+	utils.paintPixel(legendWindow,4,5,colors.lime)
+	utils.paintPixel(legendWindow,4,6,colors.green)
+	utils.paintPixel(legendWindow,4,7,colors.orange)
+	utils.paintPixel(legendWindow,4,8,colors.red)
+	utils.paintPixel(legendWindow,4,9,colors.black)
+
+	legendWindow.setTextColor(colors.black)
+	legendWindow.setBackgroundColor(colors.lightGray)
+	legendWindow.setCursorPos(2,2)
+	legendWindow.write("Color Scale:")
+	legendWindow.setCursorPos(6,3)
+	legendWindow.write("= 0.00")
+	legendWindow.setCursorPos(6,4)
+	legendWindow.write("> 0.00")
+	legendWindow.setCursorPos(6,5)
+	legendWindow.write("> 0.17")
+	legendWindow.setCursorPos(6,6)
+	legendWindow.write("> 0.33")
+	legendWindow.setCursorPos(6,7)
+	legendWindow.write("> 0.50")
+	legendWindow.setCursorPos(6,8)
+	legendWindow.write("> 0.67")
+	legendWindow.setCursorPos(6,9)
+	legendWindow.write("> 0.83")
+
+	totalWindow.setTextColor(colors.black)
+	totalWindow.setBackgroundColor(colors.lightGray)
+	totalWindow.setCursorPos(2,2)
+	totalWindow.write("   Total Cases")
+	totalWindow.setCursorPos(2,3)
+	totalWindow.write("Confirmed: "..totalData.positif)
+	totalWindow.setCursorPos(2,4)
+	totalWindow.write("Deaths   : "..totalData.meninggal)
+	totalWindow.setCursorPos(2,5)
+	totalWindow.write("Recovered: "..totalData.sembuh)
+end
+
+local function drawMap()
+	--paint map
+	utils.drawImage(mapWindow,'indo',1,1,true)
+end
+drawMap()
 
 local function drawHeader()
 	--paint title
@@ -84,14 +161,13 @@ local function drawHeader()
 	creatorWindow.write("by Purplefin Neptuna")
 	dataWindow.write("Data provided by Kawal Corona API")
 	timeWindow.write(os.date("Last Update: %x %X",tstamp))
-	--paint map
-	utils.drawImage(mapWindow,'indo',1,1,true)
 end
 drawHeader()
 
 local cv = {}
 local codeToColor = {}
-local function calculateData()
+local maxCase = 0
+local function parseData()
 	--process json
 	local cvdata = json.decode(cvdata)
 	print("Got "..tableExt.length(cvdata).." confirmed regions")
@@ -108,11 +184,21 @@ local function calculateData()
 	end
 
 	--get max case
-	local maxCase = 0
 	for k,v in pairs(cv) do
 		maxCase = math.max(v.confi,maxCase)
 	end
 
+	--process total json
+	totalData = json.decode(totalData)
+	totalData = totalData[1]
+	totalData.positif = string.gsub(totalData.positif, ',', '')
+	totalData.sembuh = string.gsub(totalData.sembuh, ',', '')
+	totalData.meninggal = string.gsub(totalData.meninggal, ',', '')
+end
+parseData()
+
+local function calculateData()
+	--calculate heat level per region
 	for k,v in pairs(cv) do
 		if logMode then
 			codeToColor[k] = getColor(math.log(v.confi)/math.log(maxCase))
@@ -123,12 +209,59 @@ local function calculateData()
 end
 calculateData()
 
---read mapdata
-print("Load Map Data")
-local data = fs.open("mapindo.json","r")
-cvdata = data.readAll()
-data.close()
-local mapData = json.decode(cvdata)
+--draw popup window for region data
+local popupDrawn = false
+local function drawPopup(cid, x, y)
+	local rx = x
+	local ry = y - 8
+	local nx = x
+	local ny = y
+
+	local popName = c2name[tostring(cid)]
+	local numPos
+	local numDed
+	local numRec
+	if cv[cid] ~= nil then
+		numPos = cv[cid].confi
+		numDed = cv[cid].death
+		numRec = cv[cid].recov
+	else
+		numPos = 0
+		numDed = 0
+		numRec = 0
+	end
+	local popPos = "Confirmed: "..numPos
+	local popDed = "Deaths   : "..numDed
+	local popRec = "Recovered: "..numRec
+
+	local maxL = math.max(#popName, #popPos, #popDed, #popRec)
+	maxL = maxL
+
+	if rx > 60 then
+		nx = nx - maxL - 2
+	else
+		nx = nx + 1
+	end
+
+	if ry > 22 then
+		ny = ny - 6
+	else
+		ny = ny + 1
+	end
+
+	popupWindow.reposition(nx,ny,maxL+2,6)
+	utils.drawWindow(popupWindow, colors.lightBlue, colors.lightGray)
+	popupWindow.setTextColor(colors.black)
+	popupWindow.setBackgroundColor(colors.lightGray)
+	popupWindow.setCursorPos(2,2)
+	popupWindow.write(utils.stringMiddle(popName,maxL))
+	popupWindow.setCursorPos(2,3)
+	popupWindow.write(utils.stringMiddle(popPos,maxL))
+	popupWindow.setCursorPos(2,4)
+	popupWindow.write(utils.stringMiddle(popDed,maxL))
+	popupWindow.setCursorPos(2,5)
+	popupWindow.write(utils.stringMiddle(popRec,maxL))
+end
 
 --draw map color based on case
 local function drawHeat()
@@ -145,31 +278,51 @@ local function drawHeat()
 	end
 end
 drawHeat()
+drawLegend()
+
+--test popup
+--drawPopup(53,3,11)
+
+--for redraw map
+local function reDrawMap()
+	drawMap()
+	drawHeat()
+	drawLegend()
+end
 
 --for force recalculate
 local function recalculate()
-	updateData()
 	calculateData()
-	drawHeat()
+	reDrawMap()
 end
 
---for redraw all windows
-local function reDraw()
+--for force update data
+local function forceUpdate()
+	updateData()
+	parseData()
 	drawHeader()
-	drawHeat()
+	recalculate()
 end
 
---[[
-Last Update: 99/99/99 99:99:99
-30 char %x %X
-
-Color scale (log):
-	" > 0
-	" > 0
-	" > 0
-	" > 0
-	" > 0
-	" > 0
-
-18x7 size
-]]--
+while true do
+	local p = {}
+	p[1], p[2], p[3], p[4], p[5] = os.pullEvent()
+    if p[1] == 'monitor_touch' then
+		--print(p[2]..": "..p[3]..", "..p[4])
+		local nx = p[3]
+		local ny = p[4] - 8
+		if ny > 0 and nx > 0 then
+			local reg = mapData[nx][ny]
+			if reg == 0 and popupDrawn then
+				reDrawMap()
+				popupDrawn = false
+			elseif reg ~= 0 then
+				if popupDrawn then
+					reDrawMap()
+				end
+				drawPopup(reg, p[3], p[4])
+				popupDrawn = true
+			end
+		end
+	end
+end
