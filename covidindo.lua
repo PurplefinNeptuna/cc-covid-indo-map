@@ -49,12 +49,12 @@ local t = term.current()
 --enable red gradient mode
 local function setColor(mode)
 	if mode then
-		m.setPaletteColor(colors.yellow, 0xdddd65)
-		m.setPaletteColor(colors.lime, 0xd7b84f)
-		m.setPaletteColor(colors.green, 0xce933a)
-		m.setPaletteColor(colors.orange, 0xc26e25)
-		m.setPaletteColor(colors.red, 0xb54511)
-		m.setPaletteColor(colors.purple, 0xa50000)
+		m.setPaletteColor(colors.yellow, 0xebcdc6)
+		m.setPaletteColor(colors.lime, 0xe3ab9e)
+		m.setPaletteColor(colors.green, 0xd88877)
+		m.setPaletteColor(colors.orange, 0xc96651)
+		m.setPaletteColor(colors.red, 0xb8412e)
+		m.setPaletteColor(colors.purple, 0xa50a0a)
 	else
 		m.setPaletteColor(colors.yellow, 0xDEDE6C)
 		m.setPaletteColor(colors.lime, 0x7FCC19)
