@@ -1,4 +1,15 @@
 local utils = {}
+
+function utils.paintPixel(T,x,y,c,retain)
+	retain = retain or false
+	T.setCursorPos(x,y)
+	T.setBackgroundColor(c)
+	T.write(" ")
+	if not retain then
+		T.setBackgroundColor(colors.black)
+	end
+end
+
 function utils.drawImage(nTerm, imageLoc, x, y, clear, retain)
 	clear = clear or false
 	retain = retain or false
@@ -10,14 +21,9 @@ function utils.drawImage(nTerm, imageLoc, x, y, clear, retain)
     end
     for i=1, #img do
         local imgL = img[i]
-        for j=1, #imgL do
-            nTerm.setCursorPos(j+x,i+y)
-            nTerm.setBackgroundColor(imgL[j])
-            nTerm.write(" ")
+		for j=1, #imgL do
+			utils.paintPixel(nTerm, j+x, i+y, imgL[j], retain)
         end
-	end
-	if not retain then
-		nTerm.setBackgroundColor(colors.black)
 	end
 end
 
@@ -27,34 +33,16 @@ function utils.drawOnMonitor(imageLoc, x, y, clear, retain)
     x = x-1
     y = y-1
     local img = paintutils.loadImage(imageLoc)
-    --t = term.current()
     local nTerm = peripheral.find('monitor')
     if clear then
         nTerm.clear()
     end
-    --term.redirect(nTerm)
     for i=1, #img do
         local imgL = img[i]
         for j=1, #imgL do
-            nTerm.setCursorPos(j+x,i+y)
-            nTerm.setBackgroundColor(imgL[j])
-            nTerm.write(" ")
+			utils.paintPixel(nTerm, j+x, i+y, imgL[j], retain)
         end
     end
-	--term.redirect(t)
-	if not retain then
-		nTerm.setBackgroundColor(colors.black)
-	end
-end
-
-function utils.paintPixel(T,x,y,c,retain)
-	retain = retain or false
-	T.setCursorPos(x,y)
-	T.setBackgroundColor(c)
-	T.write(" ")
-	if not retain then
-		T.setBackgroundColor(colors.black)
-	end
 end
 
 function utils.drawWindow(W, cborder, cfill, retain)
@@ -84,6 +72,23 @@ function utils.stringMiddle(S,w)
 
 	local ans = string.rep(" ", mid)..S
 	return ans
+end
+
+function utils.getOptions(S)
+	local ops = {}
+	for k,v in pairs(S) do
+		if v:sub(1,1) == "-" then
+			if v:sub(2,2) == "-" then
+				local op = v:sub(3,-1)
+				table.insert(ops,op)
+			else
+				for i = 2, #v do
+					table.insert(ops,v:sub(i,i))
+				end
+			end
+		end
+	end
+	return ops
 end
 
 return utils

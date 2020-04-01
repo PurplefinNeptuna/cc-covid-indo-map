@@ -4,11 +4,26 @@ local Pair = require('lib/Pair')
 local json = require('lib/json')
 local tableExt = require('lib/tableExt')
 
+--catch argument
+local logMode = false
+local redGradientMode = false
+local ops = utils.getOptions(arg)
+--print(tableExt.dump(ops))
+if #ops > 0 then
+	for k,v in ipairs(ops) do
+		if v == "log" or v=="l" then
+			logMode = true
+		elseif v == "red" or v=="r" then
+			redGradientMode = true
+		end
+	end
+end
+
 --code to color
 local function getColor(n)
 	local ans = colors.white
 	if n > 5/6 then
-		ans = colors.black
+		ans = colors.purple
 	elseif n > 4/6 then
 		ans = colors.red
 	elseif n > 3/6 then
@@ -31,13 +46,25 @@ m.clear()
 --get current terminal
 local t = term.current()
 
---catch --log argument
-local logMode = false
-if #arg > 0 then
-	if arg[1] == "--log" then
-		logMode = true
+--enable red gradient mode
+local function setColor(mode)
+	if mode then
+		m.setPaletteColor(colors.yellow, 0xdddd65)
+		m.setPaletteColor(colors.lime, 0xd7b84f)
+		m.setPaletteColor(colors.green, 0xce933a)
+		m.setPaletteColor(colors.orange, 0xc26e25)
+		m.setPaletteColor(colors.red, 0xb54511)
+		m.setPaletteColor(colors.purple, 0xa50000)
+	else
+		m.setPaletteColor(colors.yellow, 0xDEDE6C)
+		m.setPaletteColor(colors.lime, 0x7FCC19)
+		m.setPaletteColor(colors.green, 0x57A64E)
+		m.setPaletteColor(colors.orange, 0xF2B233)
+		m.setPaletteColor(colors.red, 0xCC4C4C)
+		m.setPaletteColor(colors.purple, 0x191919)
 	end
 end
+setColor(redGradientMode)
 
 --read mapdata
 local data = fs.open("mapindo.json","r")
@@ -98,7 +125,7 @@ if tstampnow-tstamp >= 600 then
 else
     --read saved data
     print("Opening data...")
-    local data = fs.open("dataindo.json","r")
+    data = fs.open("dataindo.json","r")
     cvdata = data.readAll()
     data.close()
 
@@ -116,7 +143,7 @@ local function drawLegend()
 	utils.paintPixel(legendWindow,4,6,colors.green)
 	utils.paintPixel(legendWindow,4,7,colors.orange)
 	utils.paintPixel(legendWindow,4,8,colors.red)
-	utils.paintPixel(legendWindow,4,9,colors.black)
+	utils.paintPixel(legendWindow,4,9,colors.purple)
 
 	legendWindow.setTextColor(colors.black)
 	legendWindow.setBackgroundColor(colors.lightGray)
@@ -235,6 +262,10 @@ local function drawPopup(cid, x, y)
 	local popRec = "Recovered: "..numRec
 
 	local maxL = math.max(#popName, #popPos, #popDed, #popRec)
+	local maxD = math.max(#popPos, #popDed, #popRec)
+	popPos = popPos..string.rep(" ",maxD-#popPos)
+	popDed = popDed..string.rep(" ",maxD-#popDed)
+	popRec = popRec..string.rep(" ",maxD-#popRec)
 	maxL = maxL
 
 	if rx > 60 then
@@ -304,9 +335,10 @@ local function forceUpdate()
 	recalculate()
 end
 
-while true do
+local running = true
+while running do
 	local p = {}
-	p[1], p[2], p[3], p[4], p[5] = os.pullEvent()
+	p[1], p[2], p[3], p[4], p[5] = os.pullEventRaw()
     if p[1] == 'monitor_touch' then
 		--print(p[2]..": "..p[3]..", "..p[4])
 		local nx = p[3]
@@ -324,5 +356,10 @@ while true do
 				popupDrawn = true
 			end
 		end
+	elseif p[1] == "terminate" then
+		printError("TERMINATE")
+		setColor(false)
+		m.setPaletteColor(colors.purple, 0xb266e5)
+		running = false
 	end
 end
