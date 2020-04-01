@@ -11,7 +11,7 @@ Script to show Indonesia COVID-19 cases by province in ComputerCraft (Minecraft 
 [![example](https://camo.githubusercontent.com/89061cc4b94d81f8098ca356af37b5bf2e6e9352/68747470733a2f2f692e6962622e636f2f62576a337832342f323032302d30332d32382d31352d33362d31342e706e67)](https://camo.githubusercontent.com/89061cc4b94d81f8098ca356af37b5bf2e6e9352/68747470733a2f2f692e6962622e636f2f62576a337832342f323032302d30332d32382d31352d33362d31342e706e67)
 
 ## Options
-`--log` for logarithmic heatmap coloring
+`--log` for logarithmic coloring
 
 ## Credits
 * [Kawal Corona](https://kawalcorona.com/)
