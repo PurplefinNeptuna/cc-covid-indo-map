@@ -10,6 +10,11 @@ Script to show Indonesia COVID-19 cases by province in ComputerCraft (Minecraft 
 2. run `covidindo` on the computer (not the monitor)
 ![example](https://i.ibb.co/n7b7W9j/2020-04-01-08-47-21.png)
 
+## WinX mode
+WinX mode use my own WinX lib to draw and update windows faster
+
+To run the program in WinX mode, run `covidindoX` instead
+
 ## Options
 `--log` or `-l` for logarithmic coloring
 
