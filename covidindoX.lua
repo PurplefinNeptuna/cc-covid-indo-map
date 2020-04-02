@@ -2,6 +2,7 @@
 local utils = require('lib/utils')
 local json = require('lib/json')
 local tableExt = require('lib/tableExt')
+local WinX = require('lib/WinX')
 
 --catch argument
 local logMode = false
@@ -80,12 +81,13 @@ local c2name = json.decode(cvdata)
 --build windows
 local titleWindow = window.create(m,2,2,97,6)
 local dataWindow = window.create(m,1,8,33,1)
-local creatorWindow = window.create(m,100,2,20,1)
+local creatorWindow = window.create(m,100,2,20,3)
 local timeWindow = window.create(m,92,8,30,1)
-local mapWindow = window.create(m,1,9,121,44)
-local legendWindow = window.create(mapWindow,6,32,14,10)
-local totalWindow = window.create(mapWindow,102,6,19,6)
-local popupWindow = window.create(mapWindow,1,1,27,6)
+
+local mapWindow = WinX("mapWindow",m,1,9,121,44)
+local legendWindow = WinX("legendWindow",mapWindow,6,32,14,10)
+local totalWindow = WinX("totalWindow",mapWindow,102,6,19,6)
+local popupWindow = WinX("popupWindow",mapWindow,1,1,27,6,false)
 
 --read timestamp
 local tstampfile = fs.open("tsindo","r")
@@ -134,50 +136,50 @@ else
 end
 
 local function drawLegend()
-	utils.drawWindow(legendWindow, colors.lightBlue, colors.lightGray)
-	utils.drawWindow(totalWindow, colors.lightBlue, colors.lightGray)
-	utils.paintPixel(legendWindow,4,3,colors.white)
-	utils.paintPixel(legendWindow,4,4,colors.yellow)
-	utils.paintPixel(legendWindow,4,5,colors.lime)
-	utils.paintPixel(legendWindow,4,6,colors.green)
-	utils.paintPixel(legendWindow,4,7,colors.orange)
-	utils.paintPixel(legendWindow,4,8,colors.red)
-	utils.paintPixel(legendWindow,4,9,colors.purple)
+	legendWindow:drawWindow(colors.lightBlue, colors.lightGray)
+	totalWindow:drawWindow(colors.lightBlue, colors.lightGray)
+	legendWindow:paintPixel(4,3,colors.white)
+	legendWindow:paintPixel(4,4,colors.yellow)
+	legendWindow:paintPixel(4,5,colors.lime)
+	legendWindow:paintPixel(4,6,colors.green)
+	legendWindow:paintPixel(4,7,colors.orange)
+	legendWindow:paintPixel(4,8,colors.red)
+	legendWindow:paintPixel(4,9,colors.purple)
 
-	legendWindow.setTextColor(colors.black)
-	legendWindow.setBackgroundColor(colors.lightGray)
-	legendWindow.setCursorPos(2,2)
-	legendWindow.write("Color Scale:")
-	legendWindow.setCursorPos(6,3)
-	legendWindow.write("= 0.00")
-	legendWindow.setCursorPos(6,4)
-	legendWindow.write("> 0.00")
-	legendWindow.setCursorPos(6,5)
-	legendWindow.write("> 0.17")
-	legendWindow.setCursorPos(6,6)
-	legendWindow.write("> 0.33")
-	legendWindow.setCursorPos(6,7)
-	legendWindow.write("> 0.50")
-	legendWindow.setCursorPos(6,8)
-	legendWindow.write("> 0.67")
-	legendWindow.setCursorPos(6,9)
-	legendWindow.write("> 0.83")
+	legendWindow:setTextColor(colors.black)
+	legendWindow:setBackgroundColor(colors.lightGray)
+	legendWindow:setCursorPos(2,2)
+	legendWindow:write("Color Scale:")
+	legendWindow:setCursorPos(6,3)
+	legendWindow:write("= 0.00")
+	legendWindow:setCursorPos(6,4)
+	legendWindow:write("> 0.00")
+	legendWindow:setCursorPos(6,5)
+	legendWindow:write("> 0.17")
+	legendWindow:setCursorPos(6,6)
+	legendWindow:write("> 0.33")
+	legendWindow:setCursorPos(6,7)
+	legendWindow:write("> 0.50")
+	legendWindow:setCursorPos(6,8)
+	legendWindow:write("> 0.67")
+	legendWindow:setCursorPos(6,9)
+	legendWindow:write("> 0.83")
 
-	totalWindow.setTextColor(colors.black)
-	totalWindow.setBackgroundColor(colors.lightGray)
-	totalWindow.setCursorPos(2,2)
-	totalWindow.write("   Total Cases")
-	totalWindow.setCursorPos(2,3)
-	totalWindow.write("Confirmed: "..totalData.positif)
-	totalWindow.setCursorPos(2,4)
-	totalWindow.write("Deaths   : "..totalData.meninggal)
-	totalWindow.setCursorPos(2,5)
-	totalWindow.write("Recovered: "..totalData.sembuh)
+	totalWindow:setTextColor(colors.black)
+	totalWindow:setBackgroundColor(colors.lightGray)
+	totalWindow:setCursorPos(2,2)
+	totalWindow:write("   Total Cases")
+	totalWindow:setCursorPos(2,3)
+	totalWindow:write("Confirmed: "..totalData.positif)
+	totalWindow:setCursorPos(2,4)
+	totalWindow:write("Deaths   : "..totalData.meninggal)
+	totalWindow:setCursorPos(2,5)
+	totalWindow:write("Recovered: "..totalData.sembuh)
 end
 
 local function drawMap()
 	--paint map
-	utils.drawImage(mapWindow,'indo',1,1,true)
+	mapWindow:drawImage('indo',1,1,true)
 end
 drawMap()
 
@@ -185,6 +187,8 @@ local function drawHeader()
 	--paint title
 	utils.drawImage(titleWindow,'titleindo',1,1,true)
 	creatorWindow.write("by Purplefin Neptuna")
+	creatorWindow.setCursorPos(1,3)
+	creatorWindow.write("WinX Mode")
 	dataWindow.write("Data provided by Kawal Corona API")
 	timeWindow.write(os.date("Last Update: %x %X",tstamp))
 end
@@ -239,7 +243,7 @@ calculateData()
 local popupDrawn = false
 local function drawPopup(cid, x, y)
 	local rx = x
-	local ry = y - 8
+	local ry = y
 	local nx = x
 	local ny = y
 
@@ -279,18 +283,18 @@ local function drawPopup(cid, x, y)
 		ny = ny + 1
 	end
 
-	popupWindow.reposition(nx,ny-8,maxL+2,6)
-	utils.drawWindow(popupWindow, colors.lightBlue, colors.lightGray)
-	popupWindow.setTextColor(colors.black)
-	popupWindow.setBackgroundColor(colors.lightGray)
-	popupWindow.setCursorPos(2,2)
-	popupWindow.write(utils.stringMiddle(popName,maxL))
-	popupWindow.setCursorPos(2,3)
-	popupWindow.write(utils.stringMiddle(popPos,maxL))
-	popupWindow.setCursorPos(2,4)
-	popupWindow.write(utils.stringMiddle(popDed,maxL))
-	popupWindow.setCursorPos(2,5)
-	popupWindow.write(utils.stringMiddle(popRec,maxL))
+	popupWindow:reposition(nx,ny,maxL+2,6)
+	popupWindow:drawWindow(colors.lightBlue, colors.lightGray)
+	popupWindow:setTextColor(colors.black)
+	popupWindow:setBackgroundColor(colors.lightGray)
+	popupWindow:setCursorPos(2,2)
+	popupWindow:write(utils.stringMiddle(popName,maxL))
+	popupWindow:setCursorPos(2,3)
+	popupWindow:write(utils.stringMiddle(popPos,maxL))
+	popupWindow:setCursorPos(2,4)
+	popupWindow:write(utils.stringMiddle(popDed,maxL))
+	popupWindow:setCursorPos(2,5)
+	popupWindow:write(utils.stringMiddle(popRec,maxL))
 end
 
 --draw map color based on case
@@ -301,7 +305,7 @@ local function drawHeat()
 			if pData ~= 0 then
 				local cData = codeToColor[pData]
 				if cData ~= nil then
-					utils.paintPixel(mapWindow,i,j,cData)
+					mapWindow:paintPixel(i,j,cData)
 				end
 			end
 		end
@@ -310,17 +314,10 @@ end
 drawHeat()
 drawLegend()
 
---for redraw map
-local function reDrawMap()
-	drawMap()
-	drawHeat()
-	drawLegend()
-end
-
 --for force recalculate
 local function recalculate()
 	calculateData()
-	reDrawMap()
+	drawHeat()
 end
 
 --for force update data
@@ -341,13 +338,13 @@ while running do
 		if ny > 0 and nx > 0 then
 			local reg = mapData[nx][ny]
 			if reg == 0 and popupDrawn then
-				reDrawMap()
 				popupDrawn = false
+				popupWindow:setVisible(false)
 			elseif reg ~= 0 then
-				if popupDrawn then
-					reDrawMap()
+				if not popupDrawn then
+					popupWindow:setVisible(true)
 				end
-				drawPopup(reg, p[3], p[4])
+				drawPopup(reg, p[3], p[4]-8)
 				popupDrawn = true
 			end
 		end
